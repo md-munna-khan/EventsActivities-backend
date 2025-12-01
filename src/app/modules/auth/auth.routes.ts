@@ -12,6 +12,11 @@ router.post(
     authLimiter,
     AuthController.loginUser
 );
+router.post(
+    '/apply-host',
+   auth( UserRole.CLIENT),
+    AuthController.applyHost
+);
 
 router.post(
     '/refresh-token',

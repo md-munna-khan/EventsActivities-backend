@@ -33,6 +33,8 @@ router.delete(
     auth( UserRole.ADMIN),
     AdminController.deleteFromDB
 );
+router.patch('/:hostId/approve', auth(UserRole.ADMIN),  AdminController.HostApprove);
+router.patch('/:hostId/reject', auth(UserRole.ADMIN),   AdminController.HostReject);
 
 
 export const AdminRoutes = router;

@@ -1,4 +1,4 @@
-import { Gender, UserStatus } from "@prisma/client";
+import { UserStatus } from "@prisma/client";
 import { z } from "zod";
 
 const createAdmin = z.object({

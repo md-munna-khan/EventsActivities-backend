@@ -68,7 +68,7 @@ model Host {
   // payments Payment[]
   // reviews  Review[]
   income Float   @default(0)
-
+  status      hostsStatus @default(PENDING)
   rating      Float? @default(0)
   ratingCount Int    @default(0)
 

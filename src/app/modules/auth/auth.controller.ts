@@ -124,7 +124,19 @@ const getMe = catchAsync(async (req: Request & { user?: any }, res: Response) =>
         data: result,
     });
 });
+const applyHost = catchAsync(
+    async (req: Request & { user?: any }, res: Response) => {
+         const user = req.cookies;
+        const result = await AuthServices.applyHost(user, req.body);
 
+        sendResponse(res, { 
+            statusCode: httpStatus.OK,
+            success: true,
+            message: "Host application submitted successfully", 
+            data: result,
+        });
+    }   
+);
 
 
 export const AuthController = {
@@ -133,5 +145,6 @@ export const AuthController = {
     changePassword,
     forgotPassword,
     resetPassword,
+    applyHost,
     getMe
 };

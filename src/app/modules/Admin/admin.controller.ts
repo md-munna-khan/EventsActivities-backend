@@ -6,6 +6,8 @@ import { adminFilterableFields } from './admin.constant';
 import httpStatus from 'http-status';
 import { sendResponse } from '../../../shared/sendResponse';
 import { catchAsync } from '../../../shared/catchAsync';
+import prisma from '../../../shared/prisma';
+import { hostsStatus, UserRole } from '@prisma/client';
 
 
 
@@ -60,6 +62,58 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
+const HostApprove = catchAsync(async (req: Request, res: Response) => {
+  const { hostId } = req.params;
+
+  const host = await prisma.host.findUniqueOrThrow({ where: { id: hostId } });
+
+  // update host status
+  const updatedHost = await prisma.host.update({
+    where: { id: hostId },
+    data: { status: hostsStatus.APPROVED }
+  });
+
+  // update related user role to HOST (relation via email)
+  await prisma.user.update({
+    where: { email: host.email },
+    data: { role: UserRole.HOST }
+  });
+
+  // optionally: send notification/email to host
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Host approved',
+    data: updatedHost
+  });
+});
+
+const HostReject = catchAsync(async (req: Request, res: Response) => {
+  const { hostId } = req.params;
+ 
+
+  const host = await prisma.host.findUniqueOrThrow({ where: { id: hostId } });
+
+  const updatedHost = await prisma.host.update({
+    where: { id: hostId },
+    data: { status: hostsStatus.REJECTED }
+  });
+  // update related user role to HOST (relation via email)
+  await prisma.user.update({
+    where: { email: host.email },
+    data: { role: UserRole.HOST }
+  });
+
+  // optionally: store reason in audit log or notify user via email
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Host rejected',
+    data: updatedHost
+  });
+});
 
 
 
@@ -68,4 +122,6 @@ export const AdminController = {
     getByIdFromDB,
     updateIntoDB,
     deleteFromDB,
+    HostApprove,
+    HostReject
 }

@@ -3,7 +3,11 @@ enum UserRole {
   CLIENT
   HOST
 }
-
+enum hostsStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
 enum UserStatus {
   ACTIVE
   SUSPENDED
