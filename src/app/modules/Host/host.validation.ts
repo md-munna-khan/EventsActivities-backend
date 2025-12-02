@@ -2,7 +2,7 @@ import { z } from "zod";
 import { EventCategory, EventStatus } from "@prisma/client";
 
 // Create Event Validation Schema
-export const createEventValidation = z.object({
+export const createHostValidation = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
   category: z.nativeEnum(EventCategory, {
     message: "Invalid event category",
@@ -23,7 +23,7 @@ export const createEventValidation = z.object({
 });
 
 // Update Event Validation Schema
-export const updateEventValidation = z.object({
+export const updateHostValidation = z.object({
  
     title: z.string().min(2).optional(),
     category: z.nativeEnum(EventCategory).optional(),
@@ -42,6 +42,7 @@ export const updateEventValidation = z.object({
 
 });
 export const eventValidation = {
-  createEventValidation,
-  updateEventValidation,
+ createHostValidation,
+ updateHostValidation,
+
 };

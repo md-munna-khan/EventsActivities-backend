@@ -15,3 +15,4 @@ export const eventFilterableFields: string[] = [
   "status",
   "searchTerm",
 ];
+

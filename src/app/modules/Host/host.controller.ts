@@ -3,7 +3,8 @@ import httpStatus from "http-status";
 import pick from "../../../shared/pick";
 import { catchAsync } from "../../../shared/catchAsync";
 import { sendResponse } from "../../../shared/sendResponse";
-import eventsService from "./host.service";
+import { hostService } from "./host.service";
+
 
 
 
@@ -11,7 +12,7 @@ import eventsService from "./host.service";
 // Create event (HOST)
 const createEvent = catchAsync(async (req: Request,  res: Response) => {
 const user = req.cookies
-  const result = await eventsService.createEvent(req,user);
+  const result = await hostService.createEvent(req,user);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -26,7 +27,7 @@ const getEvents = catchAsync(async (req: Request, res: Response) => {
   const filter = pick(req.query, ["category", "status", "search", "fromDate", "toDate"]);
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
-  const result = await eventsService.getEvents({ filter, pagination: { page, limit } });
+  const result = await hostService.getEvents({ filter, pagination: { page, limit } });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -39,7 +40,7 @@ const getEvents = catchAsync(async (req: Request, res: Response) => {
 
 const getSingleEvent = catchAsync(async (req: Request, res: Response) => { 
   const { id } = req.params;
-  const event = await eventsService.getSingleEvent(id);
+  const event = await hostService.getSingleEvent(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -51,7 +52,7 @@ const getSingleEvent = catchAsync(async (req: Request, res: Response) => {
 const updateEvent = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const payload = req.body;
-  const updated = await eventsService.updateEvent(id, payload, req);
+  const updated = await hostService.updateEvent(id, payload, req);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -62,7 +63,7 @@ const updateEvent = catchAsync(async (req: Request, res: Response) => {
 
 const deleteEvent = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const result =await eventsService.deleteEvent(id, req);
+  const result =await hostService.deleteEvent(id, req);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -71,41 +72,14 @@ const deleteEvent = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// participant controllers
-const joinEvent = catchAsync(async (req: Request, res: Response) => {
-  const { id: eventId } = req.params;
- const user = req.cookies;// must be authenticated client
-  if (!user) throw new Error("Unauthorized");
 
-  const participant = await eventsService.joinEvent(eventId, user);
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    success: true,
-    message: "Joined event successfully",
-    data: participant,
-  });
-});
 
-const leaveEvent = catchAsync(async (req: Request, res: Response) => {
-  const { id: eventId } = req.params;
- const user = req.cookies;// must be authenticated client
-  if (!user) throw new Error("Unauthorized");
 
-  const result = await eventsService.leaveEvent(eventId, user);
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Left event successfully",
-    data: result
-  });
-});
-
-export const eventsController = {
+export const hostController = {
   createEvent,
   getEvents,
   getSingleEvent,
   updateEvent,
   deleteEvent,
-  joinEvent,
-  leaveEvent,
+
 };

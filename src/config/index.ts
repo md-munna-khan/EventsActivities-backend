@@ -16,6 +16,23 @@ export default {
   node_env: requireEnv("NODE_ENV"),
   port: requireEnv("PORT"),
   database_url: requireEnv("DATABASE_URL"),
+    sslcommerz: {
+    store_id: requireEnv("SSL_STORE_ID"),
+    store_passwd: requireEnv("SSL_STORE_PASS"),
+    payment_api: requireEnv("SSL_PAYMENT_API"),
+    validation_api: requireEnv("SSL_VALIDATION_API"),
+    ipn_url: requireEnv("SSL_IPN_URL"),
+
+    // Backend callbacks (where SSLCommerz posts payment result)
+    success_backend_url: requireEnv("SSL_SUCCESS_BACKEND_URL"),
+    fail_backend_url: requireEnv("SSL_FAIL_BACKEND_URL"),
+    cancel_backend_url: requireEnv("SSL_CANCEL_BACKEND_URL"),
+
+    // Frontend redirects (to return user)
+    success_frontend_url: requireEnv("SSL_SUCCESS_FRONTEND_URL"),
+    fail_frontend_url: requireEnv("SSL_FAIL_FRONTEND_URL"),
+    cancel_frontend_url: requireEnv("SSL_CANCEL_FRONTEND_URL"),
+  },
 
   cloudinary: {
     api_secret: requireEnv("CLOUDINARY_API_SECRET"),

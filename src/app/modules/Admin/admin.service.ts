@@ -1,6 +1,6 @@
 
 
-import { Admin, Prisma, UserStatus } from "@prisma/client";
+import { Admin, EventStatus, Prisma, UserStatus } from "@prisma/client";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 
 
@@ -123,12 +123,41 @@ const deleteFromDB = async (id: string): Promise<Admin | null> => {
     return result;
 }
 
+const getPendingEvents = async () => {
+  const events = await prisma.event.findMany({
+    where: { status: EventStatus.PENDING },
+    include: { host: true },
+  });
+  return events;
+};
+ const approveEvent = async (eventId: string) => {
+  const event = await prisma.event.findUnique({ where: { id: eventId } });
+  if (!event) throw new Error("Event not found");
+  if (event.status !== EventStatus.PENDING) throw new Error("Only pending events can be approved");
 
+  return await prisma.event.update({
+    where: { id: eventId },
+    data: { status: EventStatus.OPEN },
+    include: { host: true },
+  });
+};
+ const rejectEvent = async (eventId: string) => {
+  const event = await prisma.event.findUnique({ where: { id: eventId } });
+  if (!event) throw new Error("Event not found");
+  if (event.status !== EventStatus.PENDING) throw new Error("Only pending events can be rejected");
 
-
+  return await prisma.event.update({
+    where: { id: eventId },
+    data: { status: EventStatus.REJECTED },
+    include: { host: true },
+  });
+};
 export const AdminService = {
     getAllFromDB,
     getByIdFromDB,
     updateIntoDB,
     deleteFromDB,
+    getPendingEvents,
+   approveEvent,
+   rejectEvent
 }

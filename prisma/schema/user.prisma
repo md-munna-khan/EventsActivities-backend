@@ -71,6 +71,7 @@ model Host {
   status      hostsStatus @default(PENDING)
   rating      Float? @default(0)
   ratingCount Int    @default(0)
+ payments     Payment[]
 
   @@map("hosts")
 }

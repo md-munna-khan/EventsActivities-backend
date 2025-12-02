@@ -33,8 +33,16 @@ router.delete(
     auth( UserRole.ADMIN),
     AdminController.deleteFromDB
 );
+// host event approval/rejection routes
 router.patch('/:hostId/approve', auth(UserRole.ADMIN),  AdminController.HostApprove);
 router.patch('/:hostId/reject', auth(UserRole.ADMIN),   AdminController.HostReject);
 
+// fetch pending events route
+router.get("/events/pending",auth(UserRole.ADMIN),AdminController.fetchPendingEvents);
+// approve an event
+router.patch("/events/:id/approve", auth(UserRole.ADMIN), AdminController.approveEventController);
+
+// reject an event
+router.patch("/events/:id/reject",  auth(UserRole.ADMIN),AdminController.rejectEventController);
 
 export const AdminRoutes = router;

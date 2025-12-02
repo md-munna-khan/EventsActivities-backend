@@ -114,14 +114,46 @@ const HostReject = catchAsync(async (req: Request, res: Response) => {
     data: updatedHost
   });
 });
+ const fetchPendingEvents = catchAsync(async (req: Request, res: Response) => {
+  const events = await AdminService.getPendingEvents();
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Pending events fetched successfully",
+    data: events,
+  });
+});
+export const approveEventController = catchAsync(async (req: Request, res: Response) => {
+  const { id: eventId } = req.params;
+  const updatedEvent = await AdminService.approveEvent(eventId);
 
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Event approved successfully",
+    data: updatedEvent,
+  });
+});
 
+export const rejectEventController = catchAsync(async (req: Request, res: Response) => {
+  const { id: eventId } = req.params;
+  const updatedEvent = await AdminService.rejectEvent(eventId);
 
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Event rejected successfully",
+    data: updatedEvent,
+  });
+});
 export const AdminController = {
     getAllFromDB,
     getByIdFromDB,
     updateIntoDB,
     deleteFromDB,
     HostApprove,
-    HostReject
+    HostReject,
+    fetchPendingEvents,
+    approveEventController,
+    rejectEventController
 }

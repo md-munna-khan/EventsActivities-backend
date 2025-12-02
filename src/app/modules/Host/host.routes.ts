@@ -3,8 +3,9 @@ import { fileUploader } from "../../../helpers/fileUploader";
 import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 
-import { eventsController } from "./host.controller";
+
 import { eventValidation } from "./host.validation";
+import { hostController } from "./host.controller";
 
 
 const router = express.Router();
@@ -16,34 +17,32 @@ router.post(
   auth(UserRole.HOST),
   fileUploader.upload.single("file"),
    (req: Request, res: Response, next: NextFunction) => {
-        req.body = eventValidation.createEventValidation.parse(JSON.parse(req.body.data))
-        return eventsController.createEvent(req, res, next)
+        req.body = eventValidation.createHostValidation.parse(JSON.parse(req.body.data))
+        return hostController.createEvent(req, res, next)
     }
 );
 // Get list with filters & pagination (public)
-router.get("/", eventsController.getEvents);
+router.get("/", hostController.getEvents);
 
 // Get single event
-router.get("/:id", eventsController.getSingleEvent);
+router.get("/:id", hostController.getSingleEvent);
 
 // Update event (host/admin) - allow optional file upload
 router.patch(
   "/:id",
-  auth(), // allow host or admin; inside service we check ownership
+  auth(UserRole.HOST,UserRole.ADMIN), // allow host or admin; inside service we check ownership
   fileUploader.upload.single("file"),
     (req: Request, res: Response, next: NextFunction) => {
-        req.body = eventValidation.updateEventValidation.parse(JSON.parse(req.body.data))
-        return eventsController.updateEvent(req, res, next)
+        req.body = eventValidation.updateHostValidation.parse(JSON.parse(req.body.data))
+        return hostController.updateEvent(req, res, next)
     }
 );
 
 // Delete event
-router.delete("/:id", auth(), eventsController.deleteEvent);
-
-// Participant: join / leave
-router.post("/:id/join", auth(UserRole.CLIENT), eventsController.joinEvent);
-router.post("/:id/leave", auth(UserRole.CLIENT), eventsController.leaveEvent);
+router.delete("/:id", auth(), hostController.deleteEvent);
 
 
 
-export const eventsRoutes = router;
+
+
+export const hostsRoutes = router;
