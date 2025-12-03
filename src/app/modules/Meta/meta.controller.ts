@@ -1,16 +1,17 @@
 import { Request, Response } from "express";
 
-import { MetaService } from "./meta.service";
+
 
 import httpStatus from "http-status";
+import { MetaService } from "./meta.service";
 import { catchAsync } from "../../../shared/catchAsync";
 import { sendResponse } from "../../../shared/sendResponse";
 
 
 
 const fetchDashboardMetaData = catchAsync(async (req: Request, res: Response) => {
-
-    const user = req.user;
+    // prefer authenticated user set by auth middleware, fallback to cookies
+    const user = (req as any).user || req.cookies;
     const result = await MetaService.fetchDashboardMetaData(user);
 
     sendResponse(res, {

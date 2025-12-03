@@ -67,16 +67,16 @@ const getAllFromDB = async (params: IAdminFilterRequest, options: IPaginationOpt
     };
 };
 
-const getByIdFromDB = async (id: string): Promise<Admin | null> => {
-    const result = await prisma.admin.findUnique({
-        where: {
-            id,
-            isDeleted: false
-        }
-    })
+// const getByIdFromDB = async (id: string): Promise<Admin | null> => {
+//     const result = await prisma.admin.findUnique({
+//         where: {
+//             id,
+//             isDeleted: false
+//         }
+//     })
 
-    return result;
-};
+//     return result;
+// };
 
 const updateIntoDB = async (id: string, data: Partial<Admin>): Promise<Admin> => {
     await prisma.admin.findUniqueOrThrow({
@@ -152,12 +152,76 @@ const getPendingEvents = async () => {
     include: { host: true },
   });
 };
+
+
+// // fetch clients with pagination and optional search
+// const getAllClients = async (params: { searchTerm?: string }, options: IPaginationOptions) => {
+
+//     const { page, limit, skip } = paginationHelper.calculatePagination(options);
+//     const { searchTerm } = params;
+
+//     const where: any = { isDeleted: false };
+//     if (searchTerm) {
+//         where.OR = [
+//             { name: { contains: searchTerm, mode: 'insensitive' } },
+//             { email: { contains: searchTerm, mode: 'insensitive' } },
+//         ];
+//     }
+
+//     const data = await prisma.client.findMany({
+//         where,
+//         skip,
+//         take: limit,
+//         orderBy: { createdAt: 'desc' },
+//     });
+
+//     const total = await prisma.client.count({ where });
+
+//     return {
+//         meta: { page, limit, total },
+//         data,
+//     };
+// };
+
+// // fetch hosts with pagination and optional search
+// const getAllHosts = async (params: { searchTerm?: string }, options: IPaginationOptions) => {
+//     const { page, limit, skip } = paginationHelper.calculatePagination(options);
+//     const { searchTerm } = params;
+
+//     const where: any = { isDeleted: false };
+//     if (searchTerm) {
+//         where.OR = [
+//             { name: { contains: searchTerm, mode: 'insensitive' } },
+//             { email: { contains: searchTerm, mode: 'insensitive' } },
+//         ];
+//     }
+
+//     const data = await prisma.host.findMany({
+//         where,
+//         skip,
+//         take: limit,
+//         orderBy: { createdAt: 'desc' },
+//     });
+
+//     const total = await prisma.host.count({ where });
+
+//     return {
+//         meta: { page, limit, total },
+//         data,
+//     };
+// };
+
+
+
+
+
 export const AdminService = {
     getAllFromDB,
-    getByIdFromDB,
+    // getByIdFromDB,
     updateIntoDB,
     deleteFromDB,
     getPendingEvents,
    approveEvent,
-   rejectEvent
-}
+   rejectEvent,
+//   
+}// 

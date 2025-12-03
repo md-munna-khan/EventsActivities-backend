@@ -5,11 +5,7 @@ import { UserRole } from '@prisma/client';
 
 const router = express.Router();
 
-router.get(
-    '/',
-    auth( UserRole.ADMIN, UserRole.CLIENT),
-    MetaController.fetchDashboardMetaData
-)
-
+// Admin and Host dashboard meta
+router.get('/', auth(UserRole.ADMIN, UserRole.HOST), MetaController.fetchDashboardMetaData);
 
 export const MetaRoutes = router;

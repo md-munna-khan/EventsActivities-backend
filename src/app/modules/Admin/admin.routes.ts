@@ -15,11 +15,11 @@ router.get(
     AdminController.getAllFromDB
 );
 
-router.get(
-    '/:id',
-    auth( UserRole.ADMIN),
-    AdminController.getByIdFromDB
-);
+// router.get(
+//     '/:id',
+//     auth( UserRole.ADMIN),
+//     AdminController.getByIdFromDB
+// );
 
 router.patch(
     '/:id',
@@ -28,11 +28,16 @@ router.patch(
     AdminController.updateIntoDB
 );
 
-router.delete(
+router.delete( 
     '/:id',
     auth( UserRole.ADMIN),
     AdminController.deleteFromDB
 );
+// list clients and hosts
+// router.get('/user-clients', auth(UserRole.ADMIN), AdminController.getAllClients);
+// router.get('/user-hosts', auth(UserRole.ADMIN), AdminController.getAllHosts);
+// dashboard / metadata
+
 // host event approval/rejection routes
 router.patch('/:applicationId/approve', auth(UserRole.ADMIN),  AdminController.HostApprove);
 router.patch('/:applicationId/reject', auth(UserRole.ADMIN),   AdminController.HostReject);
