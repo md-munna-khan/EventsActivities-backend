@@ -33,10 +33,7 @@ router.delete(
     auth( UserRole.ADMIN),
     AdminController.deleteFromDB
 );
-// list clients and hosts
-// router.get('/user-clients', auth(UserRole.ADMIN), AdminController.getAllClients);
-// router.get('/user-hosts', auth(UserRole.ADMIN), AdminController.getAllHosts);
-// dashboard / metadata
+
 
 // host event approval/rejection routes
 router.patch('/:applicationId/approve', auth(UserRole.ADMIN),  AdminController.HostApprove);

@@ -62,33 +62,6 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-// const getAllClients = catchAsync(async (req: Request, res: Response) => {
-//   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-//   const searchTerm = (req.query.searchTerm as string) ?? undefined;
-//   const result = await AdminService.getAllClients({ searchTerm }, options as any);
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Clients fetched successfully',
-//     meta: result.meta,
-//     data: result.data,
-//   });
-// });
-
-// const getAllHosts = catchAsync(async (req: Request, res: Response) => {
-//   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-//   const searchTerm = (req.query.searchTerm as string) ?? undefined;
-//   const result = await AdminService.getAllHosts({ searchTerm }, options as any);
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Hosts fetched successfully',
-//     meta: result.meta,
-//     data: result.data,
-//   });
-// });
 
 
 export const approveEventController = catchAsync(async (req: Request, res: Response) => {

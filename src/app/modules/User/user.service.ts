@@ -103,7 +103,7 @@ const createClient = async (req: Request): Promise<Client> => {
 
             return createdClientData;
         });
-
+console.log(result)
         return result;
     } catch (error) {
         if (uploadedPublicId) {

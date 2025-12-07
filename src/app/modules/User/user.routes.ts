@@ -33,12 +33,13 @@ router.post(
 );
 
 
-// dummy
+
 router.post(
     "/create-client",
     multerUpload.single('file'),
     (req: Request, res: Response, next: NextFunction) => {
         req.body = userValidation.createClient.parse(JSON.parse(req.body.data))
+        console.log(req.body)
         return userController.createClient(req, res, next)
     }
 );

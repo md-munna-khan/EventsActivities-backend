@@ -1,6 +1,6 @@
 
 import { uploadBufferToCloudinary, cloudinaryUpload } from "../../../config/cloudinary.config";
-
+import { EventCategory, EventStatus, Prisma } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 import { jwtHelper } from "../../../helpers/jwtHelper";
 import config from "../../../config";
@@ -9,6 +9,9 @@ import { QueryOptions } from "../../interfaces/common";
 
 
 import { Request } from "express";
+import { get } from "http";
+const EVENT_CATEGORIES = Object.values(EventCategory) as string[];
+const EVENT_STATUSES = Object.values(EventStatus) as string[];
 
 const createEvent = async (req:any,user:any)=> {
 
@@ -80,15 +83,116 @@ if (!host) {
 
 };
 
+// const getEvents = async (options: QueryOptions = {}) => {
+//   const filter = options.filter ?? {};
+//   const pagination = options.pagination ?? { page: 1, limit: 10 };
+
+//   const where: any = {};
+
+//   // build where from filter (category, status, fromDate, toDate, search)
+//   if (filter.category) where.category = filter.category;
+//   if (filter.status) where.status = filter.status;
+//   if (filter.search) {
+//     where.OR = [
+//       { title: { contains: filter.search, mode: "insensitive" } },
+//       { description: { contains: filter.search, mode: "insensitive" } },
+//       { location: { contains: filter.search, mode: "insensitive" } },
+//     ];
+//   }
+//   if (filter.fromDate || filter.toDate) {
+//     where.date = {};
+//     if (filter.fromDate) where.date.gte = new Date(filter.fromDate);
+//     if (filter.toDate) where.date.lte = new Date(filter.toDate);
+//   }
+
+//   const page = Math.max(1, Number(pagination.page) || 1);
+//   const limit = Math.max(1, Number(pagination.limit) || 10);
+//   const skip = (page - 1) * limit;
+
+//   const [total, events] = await Promise.all([
+//     prisma.event.count({ where }),
+//     prisma.event.findMany({
+//       where,
+//       skip,
+//       take: limit,
+//       orderBy: { date: "asc" },
+//       include: {
+//         host: { select: { id: true, name: true, email: true, profilePhoto: true, rating: true } },
+//         participants: true, // can be used to get count
+//       },
+//     }),
+//   ]);
+
+//   // map to include participantCount
+//   const data = events.map((e) => ({
+//     ...e,
+//     participantCount: e.participants?.length ?? 0,
+//   }));
+
+//   return {
+//     meta: { page, limit, total, pages: Math.ceil(total / limit) },
+//     data,
+//   };
+// };
+
+const getMyEvents = async (hostEmail: string) => {
+
+  const host = await prisma.host.findFirst({ where: { email: hostEmail } });
+  if (!host) throw new Error("Host profile not found");
+
+  const events = await prisma.event.findMany({
+    where: { hostId: String(host.id) },
+    orderBy: { date: "asc" },
+    include: {
+      participants: true,
+    },
+  });
+
+  const data = events.map((e) => ({
+    ...e,
+    participantCount: e.participants?.length ?? 0,
+  }));
+
+  return data;
+};
+
+
+
 const getEvents = async (options: QueryOptions = {}) => {
   const filter = options.filter ?? {};
   const pagination = options.pagination ?? { page: 1, limit: 10 };
 
   const where: any = {};
 
-  // build where from filter (category, status, fromDate, toDate, search)
-  if (filter.category) where.category = filter.category;
-  if (filter.status) where.status = filter.status;
+  if (filter.category) {
+    const normalized = String(filter.category)
+      .trim()
+      .replace(/[\s-]+/g, "_")
+      .replace(/[^A-Za-z0-9_]/g, "")
+      .toUpperCase();
+
+    const aliasMap: Record<string, string> = { ONLINE: "ONLINE_EVENT", "BOARD GAME": "BOARDGAME" };
+    const mapped = aliasMap[normalized] ?? normalized;
+
+    if (!EVENT_CATEGORIES.includes(mapped)) {
+      throw new Error(`Invalid category '${filter.category}'. Allowed: ${EVENT_CATEGORIES.join(", ")}`);
+    }
+    where.category = mapped;
+  }
+
+  if (filter.status) {
+    const normalized = String(filter.status)
+      .trim()
+      .replace(/[\s-]+/g, "_")
+      .replace(/[^A-Za-z0-9_]/g, "")
+      .toUpperCase();
+
+    if (!EVENT_STATUSES.includes(normalized)) {
+      throw new Error(`Invalid status '${filter.status}'. Allowed: ${EVENT_STATUSES.join(", ")}`);
+    }
+    where.status = normalized;
+  }
+
   if (filter.search) {
     where.OR = [
       { title: { contains: filter.search, mode: "insensitive" } },
@@ -96,6 +200,7 @@ const getEvents = async (options: QueryOptions = {}) => {
       { location: { contains: filter.search, mode: "insensitive" } },
     ];
   }
+
   if (filter.fromDate || filter.toDate) {
     where.date = {};
     if (filter.fromDate) where.date.gte = new Date(filter.fromDate);
@@ -115,21 +220,14 @@ const getEvents = async (options: QueryOptions = {}) => {
       orderBy: { date: "asc" },
       include: {
         host: { select: { id: true, name: true, email: true, profilePhoto: true, rating: true } },
-        participants: true, // can be used to get count
+        participants: true,
       },
     }),
   ]);
 
-  // map to include participantCount
-  const data = events.map((e) => ({
-    ...e,
-    participantCount: e.participants?.length ?? 0,
-  }));
+  const data = events.map((e) => ({ ...e, participantCount: e.participants?.length ?? 0 }));
 
-  return {
-    meta: { page, limit, total, pages: Math.ceil(total / limit) },
-    data,
-  };
+  return { meta: { page, limit, total, pages: Math.ceil(total / limit) }, data };
 };
 
 const getSingleEvent = async (id: string) => {
@@ -246,5 +344,5 @@ const deleteEvent = async (id: string, req?: Request) => {
   getSingleEvent,
   updateEvent,
   deleteEvent,
-  
+  getMyEvents
 };

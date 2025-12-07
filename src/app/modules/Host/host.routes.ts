@@ -22,6 +22,13 @@ router.post(
         return hostController.createEvent(req, res, next)
     }
 );
+
+
+router.get(
+  "/my-events",
+  auth(UserRole.HOST),
+  hostController.getMyEvents
+);
 // Get list with filters & pagination (public)
 router.get("/", hostController.getEvents);
 

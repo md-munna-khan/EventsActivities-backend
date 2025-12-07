@@ -21,6 +21,21 @@ const user = req.cookies
     data: result,
   });
 });
+const getMyEvents = catchAsync(async (req: Request, res: Response) => {
+  const requester = (req as any).user; 
+  if (!requester) throw new Error("Unauthorized");
+
+  const result = await hostService.getMyEvents(requester.email);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Host's events fetched successfully",
+    data: result,
+  });
+});
+
+
 
 const getEvents = catchAsync(async (req: Request, res: Response) => {
   // parse filters & pagination from query
@@ -81,5 +96,5 @@ export const hostController = {
   getSingleEvent,
   updateEvent,
   deleteEvent,
-
+ getMyEvents
 };

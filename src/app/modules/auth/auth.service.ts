@@ -10,7 +10,7 @@ import config from "../../../config";
 import { jwtHelper } from "../../../helpers/jwtHelper";
 import { sendEmail } from "../../../helpers/sendEmail";
 import prisma from '../../../shared/prisma';
-import { hostsStatus, UserStatus } from '@prisma/client';
+import { UserStatus } from '@prisma/client';
 import httpStatus from 'http-status-codes';
 
 
@@ -195,7 +195,9 @@ const applyHost = async (user: any) => {
   // run in transaction: create HostApplication and set user.status = PENDING
   const result = await prisma.$transaction(async (tx) => {
     const userData = await tx.user.findUniqueOrThrow({ where: { email } });
-
+if(userData.status === UserStatus.PENDING){
+    throw new Error('User already has a pending host application');
+}
     // Prevent duplicate applications
     const existingApp = await tx.hostApplication.findFirst({ where: { userId: userData.id } });
     if (existingApp) {

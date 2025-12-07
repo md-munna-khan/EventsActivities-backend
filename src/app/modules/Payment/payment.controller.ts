@@ -1,34 +1,3 @@
-// import { Request, Response } from "express";
-// import { PaymentService } from "./payment.service";
-// import { catchAsync } from "../../../shared/catchAsync";
-// import config from "../../../config";
-
-// // Handle payment success
-// const successPayment = catchAsync(async (req: Request, res: Response) => {
-//     const result = await PaymentService.successPayment(req.query as Record<string, string>);
-//     const tx = encodeURIComponent((req.query.tran_id ?? req.query.tranId) as string);
-//     res.redirect(`${config.sslcommerz.success_frontend_url}?transactionId=${tx}&message=${encodeURIComponent(result.message)}&status=PAID`);
-// });
-
-// // Handle payment failure
-// const failPayment = catchAsync(async (req: Request, res: Response) => {
-//     const result = await PaymentService.failPayment(req.query as Record<string, string>);
-//     const tx = encodeURIComponent((req.query.tran_id ?? req.query.tranId) as string);
-//     res.redirect(`${config.sslcommerz.fail_frontend_url}?transactionId=${tx}&message=${encodeURIComponent(result.message)}&status=FAILED`);
-// });
-
-// // Handle payment cancellation
-// const cancelPayment = catchAsync(async (req: Request, res: Response) => {
-//     const result = await PaymentService.cancelPayment(req.query as Record<string, string>);
-//     const tx = encodeURIComponent((req.query.tran_id ?? req.query.tranId) as string);
-//     res.redirect(`${config.sslcommerz.cancel_frontend_url}?transactionId=${tx}&message=${encodeURIComponent(result.message)}&status=CANCELLED`);
-// });
-
-// export const PaymentController = {
-//     successPayment,
-//     failPayment,
-//     cancelPayment,
-// };
 
 
 
