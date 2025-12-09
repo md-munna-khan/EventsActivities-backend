@@ -12,7 +12,6 @@ import { multerUpload } from "../../../config/multer.config";
 const router = express.Router();
 
 
- 
 router.post(
   "/create-event",
   auth(UserRole.HOST),
@@ -50,7 +49,12 @@ router.patch(
 router.delete("/:id", auth(UserRole.HOST, UserRole.ADMIN), hostController.deleteEvent);
 
 
+router.get("/", hostController.getAllHosts);
 
-
-
+// update event status
+  router.patch(
+    "/event-status/:id",
+    auth(UserRole.HOST),
+    hostController.updateEventStatus
+  );
 export const hostsRoutes = router;

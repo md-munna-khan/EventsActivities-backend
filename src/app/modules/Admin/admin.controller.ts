@@ -7,7 +7,7 @@ import httpStatus from 'http-status';
 import { sendResponse } from '../../../shared/sendResponse';
 import { catchAsync } from '../../../shared/catchAsync';
 import prisma from '../../../shared/prisma';
-import { EventStatus, hostsStatus, UserRole, UserStatus } from '@prisma/client';
+import { hostsStatus, UserRole, UserStatus } from '@prisma/client';
 
 
 
@@ -62,19 +62,18 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
-// fetch pending host applications
 const fetchPendingEventApplications = catchAsync(async (req: Request, res: Response) => {
-  const pending = await prisma.event.findMany({ where: { status: EventStatus.PENDING },
-  include:{host: true} });
-  sendResponse(res, {
+  const result = await AdminService.getPendingEvents();
+  sendResponse(res, { 
     statusCode: httpStatus.OK,
     success: true,
     message: 'Pending event applications fetched',
-    data: pending,
+    data: result
   });
-});
+}
+);
 
-export const approveEventController = catchAsync(async (req: Request, res: Response) => {
+ const approveEventController = catchAsync(async (req: Request, res: Response) => {
   const { id: eventId } = req.params;
   const updatedEvent = await AdminService.approveEvent(eventId);
 
@@ -86,7 +85,7 @@ export const approveEventController = catchAsync(async (req: Request, res: Respo
   });
 });
 
-export const rejectEventController = catchAsync(async (req: Request, res: Response) => {
+ const rejectEventController = catchAsync(async (req: Request, res: Response) => {
   const { id: eventId } = req.params;
   const updatedEvent = await AdminService.rejectEvent(eventId);
 
@@ -103,118 +102,22 @@ export const rejectEventController = catchAsync(async (req: Request, res: Respon
 
 
 // Approve host application (transactional):
-// export const HostApprove = catchAsync(async (req: Request, res: Response) => {
-//   const { applicationId } = req.params; // use application id in route
-//   // load application + user
-//   const application = await prisma.hostApplication.findUniqueOrThrow({
-//     where: { id: applicationId },
-    
-//   });
-// console.log(application)
-//   const result = await prisma.$transaction(async (tx) => {
-//     // fetch user
-//     const userData = await tx.user.findUniqueOrThrow({ where: { id: application.userId } });
-
-//     // create Host record
-//     const host = await tx.host.create({
-//       data: {
-//         email: userData.email,
-//         name: application.name ?? userData.email.split('@')[0],
-//         profilePhoto: '',
-//         contactNumber: '',
-//         bio: '',
-//         location: '',
-//         status: hostsStatus.APPROVED,
-//       },
-//     });
-
-//     // remove Client profile if exists (prevent double profiles)
-//     const client = await tx.client.findUnique({ where: { email: userData.email } });
-//     if (client) {
-//       await tx.client.delete({ where: { id: client.id } });
-//     }
-
-//     // update user role -> HOST and reactivate user
-//     await tx.user.update({
-//       where: { id: userData.id },
-//       data: { role: UserRole.HOST, status: UserStatus.ACTIVE },
-//     });
-
-//     // mark application approved
-//     const updatedApp = await tx.hostApplication.update({
-//       where: { id: applicationId },
-//       data: {  status: hostsStatus.APPROVED },
-//     });
-
-//     return { host, updatedApp };
-//   });
-
-//   return sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Host application approved and host created',
-//     data: result,
-//   });
-// });
-
-// // Reject host application (transactional):
-// export const HostReject = catchAsync(async (req: Request, res: Response) => {
-//   const { applicationId } = req.params;
-
-//   const application = await prisma.hostApplication.findUniqueOrThrow({
-//     where: { id: applicationId },
-//   });
-
-//   const result = await prisma.$transaction(async (tx) => {
-//     // set application status rejected
-//     const updatedApp = await tx.hostApplication.update({
-//       where: { id: applicationId },
-//       data: { status: 'REJECTED' },
-//     });
-
-//     // restore user status to ACTIVE so they can login again
-//     await tx.user.update({
-//       where: { id: application.userId },
-//       data: { status: UserStatus.ACTIVE },
-//     });
-
-//     return updatedApp;
-//   });
-
-//   return sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Host application rejected',
-//     data: result,
-//   });
-// });
-
-// // fetch pending host applications
-// const fetchPendingHostApplications = catchAsync(async (req: Request, res: Response) => {
-//   const pending = await prisma.hostApplication.findMany({ where: { status: hostsStatus.PENDING },
-//   include:{user: { select: { email: true }}} });
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'Pending host applications fetched',
-//     data: pending,
-//   });
-// });
-export const HostApprove = catchAsync(async (req: Request, res: Response) => {
-  const { applicationId } = req.params;
-
+ const HostApprove = catchAsync(async (req: Request, res: Response) => {
+  const { applicationId } = req.params; // use application id in route
+  // load application + user
+  const application = await prisma.hostApplication.findUniqueOrThrow({
+    where: { id: applicationId },
+  });
+console.log(application)
   const result = await prisma.$transaction(async (tx) => {
-    // load application with user
-    const application = await tx.hostApplication.findUniqueOrThrow({
-      where: { id: applicationId },
-      include: { user: true },
-    });
+    // fetch user
+    const userData = await tx.user.findUniqueOrThrow({ where: { id: application.userId } });
 
     // create Host record
     const host = await tx.host.create({
       data: {
-        email: application.user.email,
-        name: application.name ?? application.user.email.split('@')[0],
+        email: userData.email,
+        name: application.name ?? userData.email.split('@')[0],
         profilePhoto: '',
         contactNumber: '',
         bio: '',
@@ -223,20 +126,22 @@ export const HostApprove = catchAsync(async (req: Request, res: Response) => {
       },
     });
 
-    // remove client profile if exists
-    const client = await tx.client.findUnique({ where: { email: application.user.email } });
-    if (client) await tx.client.delete({ where: { id: client.id } });
+    // remove Client profile if exists (prevent double profiles)
+    const client = await tx.client.findUnique({ where: { email: userData.email } });
+    if (client) {
+      await tx.client.delete({ where: { id: client.id } });
+    }
 
-    // update user role & status
+    // update user role -> HOST and reactivate user
     await tx.user.update({
-      where: { id: application.userId },
+      where: { id: userData.id },
       data: { role: UserRole.HOST, status: UserStatus.ACTIVE },
     });
 
-    // mark hostApplication approved
+    // mark application approved
     const updatedApp = await tx.hostApplication.update({
       where: { id: applicationId },
-      data: { status: hostsStatus.APPROVED },
+      data: { status: 'APPROVED' },
     });
 
     return { host, updatedApp };
@@ -250,21 +155,22 @@ export const HostApprove = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const HostReject = catchAsync(async (req: Request, res: Response) => {
+// Reject host application (transactional):
+ const HostReject = catchAsync(async (req: Request, res: Response) => {
   const { applicationId } = req.params;
 
-  const result = await prisma.$transaction(async (tx) => {
-    const application = await tx.hostApplication.findUniqueOrThrow({
-      where: { id: applicationId },
-    });
+  const application = await prisma.hostApplication.findUniqueOrThrow({
+    where: { id: applicationId },
+  });
 
-    // mark application rejected
+  const result = await prisma.$transaction(async (tx) => {
+    // set application status rejected
     const updatedApp = await tx.hostApplication.update({
       where: { id: applicationId },
-      data: { status: hostsStatus.REJECTED },
+      data: { status: 'REJECTED' },
     });
 
-    // ensure user can login again
+    // restore user status to ACTIVE so they can login again
     await tx.user.update({
       where: { id: application.userId },
       data: { status: UserStatus.ACTIVE },
@@ -281,16 +187,9 @@ export const HostReject = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// fetch pending host applications
 const fetchPendingHostApplications = catchAsync(async (req: Request, res: Response) => {
-  const pending = await prisma.hostApplication.findMany({
-    where: {
-      status: hostsStatus.PENDING,
-      // Only fetch if user is not already a HOST
-      user: { role: { not: UserRole.HOST } },
-    },
-    include: { user: { select: { email: true, role: true } } },
-  });
-
+  const pending = await prisma.hostApplication.findMany({ where: { status: 'PENDING' } });
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -299,17 +198,58 @@ const fetchPendingHostApplications = catchAsync(async (req: Request, res: Respon
   });
 });
 
+// ==================== HOST MANAGEMENT ====================
+const getAllHosts = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, ['searchTerm', 'status']);
+  const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
+  const result = await AdminService.getAllHosts(filters, options);
 
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Hosts fetched successfully',
+    meta: result.meta,
+    data: result.data
+  });
+});
+
+const updateHostStatus = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const result = await AdminService.updateHostStatus(id, status);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Host status updated successfully',
+    data: result
+  });
+});
+
+const deleteHost = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await AdminService.deleteHost(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Host deleted successfully',
+    data: result
+  });
+});
 
 export const AdminController = {
     getAllFromDB,
-    // getByIdFromDB,
-   fetchPendingEventApplications,
     updateIntoDB,
     deleteFromDB,
     HostApprove,
     HostReject,
-   fetchPendingHostApplications,
+    fetchPendingHostApplications,
     approveEventController,
-    rejectEventController
+    rejectEventController,
+    fetchPendingEventApplications,
+    // Host Management
+    getAllHosts,
+    updateHostStatus,
+    deleteHost
 }

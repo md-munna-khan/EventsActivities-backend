@@ -123,16 +123,13 @@ const deleteFromDB = async (id: string): Promise<Admin | null> => {
     return result;
 }
 
-// const getPendingEvents = async () => {
-//   const events = await prisma.event.findMany({
-//     where: { status: EventStatus.PENDING },
-//     include: { host: true },
-//   });
-//   console.log(events)
-//   return events;
-// };
-
-
+const getPendingEvents = async () => {
+  const events = await prisma.event.findMany({
+    where: { status: EventStatus.PENDING },
+    include: { host: true },
+  });
+  return events;
+};
  const approveEvent = async (eventId: string) => {
   const event = await prisma.event.findUnique({ where: { id: eventId } });
   if (!event) throw new Error("Event not found");
@@ -156,17 +153,115 @@ const deleteFromDB = async (id: string): Promise<Admin | null> => {
   });
 };
 
+// ==================== HOST MANAGEMENT ====================
+const getAllHosts = async (params: any, options: IPaginationOptions) => {
+  const { page, limit, skip } = paginationHelper.calculatePagination(options);
+  const { searchTerm, status, ...filterData } = params;
 
+  const andConditions: Prisma.HostWhereInput[] = [];
 
+  if (searchTerm) {
+    andConditions.push({
+      OR: [
+        { name: { contains: searchTerm, mode: 'insensitive' } },
+        { email: { contains: searchTerm, mode: 'insensitive' } },
+        { location: { contains: searchTerm, mode: 'insensitive' } }
+      ]
+    });
+  }
 
+  if (status) {
+    andConditions.push({ status });
+  }
+
+  andConditions.push({ isDeleted: false });
+
+  const whereConditions: Prisma.HostWhereInput = { AND: andConditions };
+
+  const result = await prisma.host.findMany({
+    where: whereConditions,
+    skip,
+    take: limit,
+    orderBy: options.sortBy && options.sortOrder ? {
+      [options.sortBy]: options.sortOrder
+    } : {
+      createdAt: 'desc'
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          status: true
+        }
+      },
+      _count: {
+        select: {
+          events: true,
+          reviews: true
+        }
+      }
+    }
+  });
+
+  const total = await prisma.host.count({ where: whereConditions });
+
+  return {
+    meta: { page, limit, total },
+    data: result
+  };
+};
+
+const updateHostStatus = async (hostId: string, status: string) => {
+  const host = await prisma.host.findUniqueOrThrow({
+    where: { id: hostId, isDeleted: false }
+  });
+
+  const updatedHost = await prisma.host.update({
+    where: { id: hostId },
+    data: { status: status as any },
+    include: {
+      user: true
+    }
+  });
+
+  return updatedHost;
+};
+
+const deleteHost = async (hostId: string) => {
+  const host = await prisma.host.findUniqueOrThrow({
+    where: { id: hostId }
+  });
+
+  const result = await prisma.$transaction(async (tx) => {
+    // Soft delete host
+    const deletedHost = await tx.host.update({
+      where: { id: hostId },
+      data: { isDeleted: true }
+    });
+
+    // Update user status
+    await tx.user.update({
+      where: { email: host.email },
+      data: { status: UserStatus.DELETED }
+    });
+
+    return deletedHost;
+  });
+
+  return result;
+};
 
 export const AdminService = {
     getAllFromDB,
-    // getByIdFromDB,
     updateIntoDB,
     deleteFromDB,
-    // getPendingEvents,
-   approveEvent,
-   rejectEvent,
-//   
+    getPendingEvents,
+    approveEvent,
+    rejectEvent,
+    
+    // Host Management
+    getAllHosts,
+    updateHostStatus,
+    deleteHost
 }// 

@@ -53,7 +53,7 @@ router.patch(
 
 router.patch(
     "/update-my-profile",
-    auth( UserRole.ADMIN, UserRole.CLIENT),
+    auth( UserRole.ADMIN, UserRole.CLIENT,UserRole.HOST),
    multerUpload.single('file'),
     (req: Request, res: Response, next: NextFunction) => {
         req.body = JSON.parse(req.body.data)
@@ -61,5 +61,9 @@ router.patch(
     }
 );
 
-
+router.delete(
+    '/:id',
+    auth( UserRole.ADMIN),
+    userController.deleteUser
+);
 export const userRoutes = router;

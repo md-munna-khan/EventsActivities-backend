@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import { AdminController } from './admin.controller';
 import validateRequest from '../../middlewares/validateRequest';
 import { adminValidationSchemas } from './admin.validations';
@@ -35,18 +35,33 @@ router.delete(
 );
 
 
-// host event approval/rejection routes
-router.get("/pending-host-applications",auth(UserRole.ADMIN),AdminController.fetchPendingHostApplications);
-// approve a host application
+// ==================== HOST MANAGEMENT ====================
+router.get(
+    '/hosts',
+    auth(UserRole.ADMIN),
+    AdminController.getAllHosts
+);
+
+router.patch(
+    '/hosts/:id/status',
+    auth(UserRole.ADMIN),
+    AdminController.updateHostStatus
+);
+
+router.delete(
+    '/hosts/:id',
+    auth(UserRole.ADMIN),
+    AdminController.deleteHost
+);
+
+// ==================== HOST APPLICATION MANAGEMENT ====================
+router.get("/events/pending-host-applications",auth(UserRole.ADMIN),AdminController.fetchPendingHostApplications);
 router.patch('/:applicationId/approve', auth(UserRole.ADMIN),  AdminController.HostApprove);
 router.patch('/:applicationId/reject', auth(UserRole.ADMIN),   AdminController.HostReject);
 
-// fetch pending events route
+// ==================== EVENT MANAGEMENT ====================
 router.get("/events/pending-event-applications",auth(UserRole.ADMIN),AdminController.fetchPendingEventApplications);
-// approve an event
 router.patch("/events/:id/approve", auth(UserRole.ADMIN), AdminController.approveEventController);
-
-// reject an event
 router.patch("/events/:id/reject",  auth(UserRole.ADMIN),AdminController.rejectEventController);
 
 export const AdminRoutes = router;

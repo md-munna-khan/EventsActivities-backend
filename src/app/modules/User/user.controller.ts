@@ -22,37 +22,6 @@ const createAdmin = catchAsync(async (req: Request, res: Response) => {
 });
 
 
-
-
-const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
-    const filters = pick(req.query, userFilterableFields);
-    const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
-
-    const result = await userService.getAllFromDB(filters, options)
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Users data fetched!",
-        meta: result.meta,
-        data: result.data
-    })
-});
-
-const changeProfileStatus = catchAsync(async (req: Request, res: Response) => {
-
-    const { id } = req.params;
-    const result = await userService.changeProfileStatus(id, req.body)
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Users profile status changed!",
-        data: result
-    })
-});
-
-
 const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 
     const user = req.user;
@@ -90,11 +59,55 @@ const createClient = catchAsync(async (req: Request, res: Response) => {
         data: result
     })
 });
+
+const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
+    const filters = pick(req.query, userFilterableFields);
+    const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder'])
+
+    const result = await userService.getAllFromDB(filters, options)
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Users data fetched!",
+        meta: result.meta,
+        data: result.data
+    })
+});
+
+const changeProfileStatus = catchAsync(async (req: Request, res: Response) => {
+
+    const { id } = req.params;
+    const result = await userService.changeProfileStatus(id, req.body)
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Users profile status changed!",
+        data: result
+    })
+});
+
+
+
+const deleteUser = catchAsync(async (req: Request, res: Response) => {
+
+    const { id } = req.params;
+    const result = await userService.deleteUser(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "User deleted successfully!",
+        data: result
+    })
+}); 
+
 export const userController = {
     createAdmin,
     getAllFromDB,
     changeProfileStatus,
     getMyProfile,
     updateMyProfile,
-    createClient
+    createClient,
+    deleteUser
 }

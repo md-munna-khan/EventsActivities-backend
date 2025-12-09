@@ -145,6 +145,7 @@ const getMyEvents = async (hostEmail: string) => {
     orderBy: { date: "asc" },
     include: {
       participants: true,
+      host: { select: { id: true, name: true, email: true, profilePhoto: true, rating: true } },
     },
   });
 
@@ -335,8 +336,40 @@ const deleteEvent = async (id: string, req?: Request) => {
 };
 
 
+const getAllHosts = async () => {
+  const hosts = await prisma.host.findMany({
+    select: { id: true, name: true, email: true, profilePhoto: true, rating: true, bio: true },
+  });
+  return hosts;
+}
+ 
+const updateEventStatus = async (id: string, status: EventStatus, req?: Request) => {
+  const existing = await prisma.event.findUnique({ where: { id } });
+  if (!existing) throw new Error("Event not found");  
+  // ownership check  
+  if (!req) throw new Error("Request required for authorization");  
+  const requester = (req as any).user;
+  if (!requester) throw new Error("Unauthorized: missing user info");
 
-
+  const host = await prisma.host.findFirst({ where: { email: requester.email } });
+  if (!host) throw new Error("Unauthorized: host profile not found for your account");  
+  if (String(host.id) !== String(existing.hostId)) {  
+    throw new Error("Unauthorized to update this event");  
+  }
+  const normalized = String(status)
+    .trim()
+    .replace(/[\s-]+/g, "_")
+    .replace(/[^A-Za-z0-9_]/g, "")
+    .toUpperCase(); 
+  if (!EVENT_STATUSES.includes(normalized)) {
+    throw new Error(`Invalid status '${status}'. Allowed: ${EVENT_STATUSES.join(", ")}`);
+  } 
+  const updated = await prisma.event.update({
+    where: { id },
+    data: { status: normalized as EventStatus },
+  }); 
+  return updated;
+};
 
  export const hostService = {
   createEvent,
@@ -344,5 +377,8 @@ const deleteEvent = async (id: string, req?: Request) => {
   getSingleEvent,
   updateEvent,
   deleteEvent,
-  getMyEvents
+  getMyEvents,
+  getAllHosts
+  ,updateEventStatus
+ 
 };
