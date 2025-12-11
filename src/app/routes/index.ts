@@ -33,7 +33,7 @@ const moduleRoutes = [
         route: hostsRoutes
     },
     {
-        path: '/payments',
+        path: '/payment',
         route: PaymentRoutes
     },
     {

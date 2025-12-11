@@ -122,7 +122,8 @@ console.log(result)
 
 
 const getMyProfile = async (user: IAuthUser) => {
-    const userInfo = await prisma.user.findUniqueOrThrow({
+ 
+    const userInfo = await prisma.user.findUnique({
         where: {
             email: user?.email,
             status: UserStatus.ACTIVE,
@@ -133,8 +134,15 @@ const getMyProfile = async (user: IAuthUser) => {
             needPasswordChange: true,
             role: true,
             status: true,
+            admin: true,
+            client: true,
+            host: true,
         },
     });
+
+    if (!userInfo) {
+        return null;
+    }
 
     let profileInfo;
 
@@ -211,7 +219,14 @@ const updateMyProfile = async (user: IAuthUser, req: Request) => {
                 data: req.body
             })
         }
-
+ if (userInfo.role === UserRole.HOST) {
+            profileInfo = await prisma.host.update({
+                where: {
+                    email: userInfo.email
+                },
+                data: req.body
+            })
+        }
         else if (userInfo.role === UserRole.CLIENT) {
             profileInfo = await prisma.client.update({
                 where: {

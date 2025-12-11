@@ -25,7 +25,9 @@ model Admin {
   isDeleted     Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
+   bio      String   @default("")   // <-- default provided
+  location String   @default("")   // <-- default provided
+   interests     Interest[]
   user User @relation(fields: [email], references: [email])
 
   @@map("admins")
@@ -62,7 +64,7 @@ model Host {
   isDeleted     Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-
+ interests     Interest[]
   user   User    @relation(fields: [email], references: [email])
   events Event[] @relation("HostedEvents")
   // payments Payment[]
