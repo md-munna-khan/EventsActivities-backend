@@ -70,7 +70,7 @@ export const createClient = z.object({
 
 const updateStatus = z.object({
     body: z.object({
-        status: z.enum([UserStatus.ACTIVE, UserStatus.PENDING, UserStatus.DELETED, UserStatus.SUSPENDED]),
+        status: z.enum([UserStatus.ACTIVE, UserStatus.PENDING, UserStatus.DELETED, UserStatus.SUSPENDED,UserStatus.INACTIVE]),
     }),
 });
 
@@ -78,4 +78,4 @@ export const userValidation = {
     createAdmin,
     createClient,
     updateStatus,
-};
+}; 

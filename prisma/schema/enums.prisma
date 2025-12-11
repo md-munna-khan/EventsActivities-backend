@@ -10,6 +10,7 @@ enum hostsStatus {
 }
 enum UserStatus {
   ACTIVE
+  INACTIVE
   SUSPENDED
   DELETED
   PENDING

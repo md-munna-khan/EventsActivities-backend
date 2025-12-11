@@ -222,8 +222,15 @@ const _failOrCancel = async (payload: Record<string, any>, reason: "FAILED" | "C
 const failPayment = async (payload: Record<string, any>) => _failOrCancel(payload, "FAILED");
 const cancelPayment = async (payload: Record<string, any>) => _failOrCancel(payload, "CANCELLED");
 
+const listAllPayments = async () => {
+  return await prisma.payment.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+};
+
 export const PaymentService = {
   successPayment,
   failPayment,
   cancelPayment,
+  listAllPayments
 };

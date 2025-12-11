@@ -111,8 +111,16 @@ const cancelPayment = catchAsync(async (req: Request, res: Response) => {
   return res.redirect(`${config.sslcommerz.cancel_frontend_url}?transactionId=${tx}&message=${msg}&status=CANCELLED`);
 });
 
+const listPayments = catchAsync(async (req: Request, res: Response) => {
+  const payments = await PaymentService.listAllPayments();
+  res.status(200).json({
+    success: true,
+    data: payments,
+  });
+});
 export const PaymentController = {
   successPayment,
   failPayment,
   cancelPayment,
+  listPayments,
 };

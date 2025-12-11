@@ -40,5 +40,7 @@ router.get("/fail", PaymentController.failPayment);
 router.post("/cancel", PaymentController.cancelPayment);
 router.get("/cancel", PaymentController.cancelPayment);
 
+router.get("/list-payments", PaymentController.listPayments);
+
 export const PaymentRoutes = router;
 

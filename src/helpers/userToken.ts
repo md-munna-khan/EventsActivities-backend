@@ -51,7 +51,7 @@ export const createNewAccessTokenWithRefreshToken = async (refreshToken: string)
         throw new ApiError(httpStatus.BAD_REQUEST, "User does not exist");
     }
 
-    if (user.status === "DELETED" || user.status === "SUSPENDED") {
+    if (user.status === "DELETED" || user.status === "SUSPENDED" ) {
         throw new ApiError(
             httpStatus.BAD_REQUEST,
             `User status is ${user.status}`
@@ -61,6 +61,12 @@ export const createNewAccessTokenWithRefreshToken = async (refreshToken: string)
         throw new ApiError(
             httpStatus.BAD_REQUEST,
             `Your Host account is still pending for approval. Please wait for the admin to approve your account!.`
+        );
+    }
+    if (user.status === "INACTIVE") {
+        throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            `Your Host account is still inactive. Please wait for the admin to activate your account!.`
         );
     }
 
