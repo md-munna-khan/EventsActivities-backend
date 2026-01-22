@@ -182,7 +182,7 @@ The project uses a global error handler supporting:
 * Zod validation errors
 * Prisma errors
 * Custom ApiError class
-
+* I wont solve
 ---
 
 ## Contribution
