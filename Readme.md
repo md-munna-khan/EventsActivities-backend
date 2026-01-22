@@ -189,6 +189,7 @@ The project uses a global error handler supporting:
 
 Pull requests are welcome! Create an issue for major changes.
 
+
 ---
 
 ## License
@@ -272,6 +273,7 @@ This repository contains the **Frontend (Next.js App Router)** that communicates
 * Mark events as "Completed"
 * Host dashboard with analytics
 * Profile customization
+- profile update
 
 ### 🛡️ Admin Features
 
